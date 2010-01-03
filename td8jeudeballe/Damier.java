@@ -44,7 +44,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 			case 1: vitesse=18; break;
 			case 2: vitesse=10; break;
 			case 3: vitesse=8; break;
-			case 4: vitesse=8; break; //le temps est plus long mais ce sera plus rapide en réalité parce qu'on va doubler la distance de déplacement par frame dans la classe Case
+			case 4: vitesse=8; break;
 			case 5: vitesse=9; break;
 		}
 		
@@ -84,7 +84,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 					String typeDifficulte="";
 					switch(type){
 						case 1: typeDifficulte = "Facile"; break;
-						case 2: typeDifficulte = "Normale"; break;
+						case 2: typeDifficulte = "Normal"; break;
 						case 3: typeDifficulte = "Difficile"; break;
 						case 4: typeDifficulte = "Légendaire"; break;
 						case 5: typeDifficulte = "Contre la montre"; break;
@@ -132,7 +132,6 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 	}
 
 	public void mouseDragged(MouseEvent e){
-	
 		if (!stop && !exit){
 			//On déplace
 			ball.deplacer(e.getX(), e.getY());
@@ -156,16 +155,31 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 					}
 				}
 		}
+		//Permet de faire revenir la balle dans le terrain si la souris en sort mais reste dragged
+		if(e.getX() < 5){
+			ball.deplacer(5, ball.getOrig().ordonne()+10);
+		}
+		if(e.getX() > COTECASE*largeurDamier-13){
+			ball.deplacer(COTECASE*largeurDamier-13, ball.getOrig().ordonne()+10);
+		}
+		if(e.getY() < 5){
+			ball.deplacer(ball.getOrig().abscisse()+11, 5);
+		}
+		if(e.getY() > COTECASE*longueurDamier-14){
+			ball.deplacer(ball.getOrig().abscisse()+11, COTECASE*longueurDamier-14);
+		}
 		repaint();
 		
 	}
 	
 	//Utile pour empêcher de tricher en faisant sortir la balle de la grille
+	//Si la souris n'est plus sur l'objet
 	public void mouseExited(MouseEvent e) {
-		exit=true;
+		exit=false; //Si la souris est juste sortie du terrain, elle garde le contrôle de la balle
 	}
+	//Si on relache le clic de la souris
 	public void mouseReleased(MouseEvent e) {
-		exit=true;
+		exit=true; //Si on a laché le clic, on perd la balle
 	}
 	
 /******************************** Méthodes diverses *************************************/

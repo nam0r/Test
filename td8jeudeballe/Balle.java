@@ -31,8 +31,8 @@ public class Balle{
 	
 	// déplace le point d’origine de la balle en (x,y)
 	public void deplacer(int x, int y){
-		orig.setAbscisse(x-10);
-		orig.setOrdonne(y-9);
+		orig.setAbscisse(x-11);
+		orig.setOrdonne(y-10);
 	}	
 	
 	// teste si le point (x,y) est dans la balle ou non
@@ -45,6 +45,7 @@ public class Balle{
 		return Math.sqrt( (p.abscisse() - orig.abscisse())*(p.abscisse() - orig.abscisse()) + (p.ordonne() - orig.ordonne())*(p.ordonne() - orig.ordonne()));
 	}
 	
+	//Permet d'avoir une distance plus réaliste, en prenant l'origine non pas en haut à gauche mais au milieu de la balle principale
 	public double distance2(Point p){
 		return Math.sqrt( (p.abscisse() - orig.abscisse()-10)*(p.abscisse() - orig.abscisse()-10) + (p.ordonne() - orig.ordonne()-10)*(p.ordonne() - orig.ordonne()-10));
 	}
