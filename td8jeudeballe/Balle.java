@@ -1,19 +1,23 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.lang.Math;
+import java.util.Random;
 
 public class Balle{
 
 	//Attributs
-	protected Color fond;
-	protected Point orig;
-	protected int diametre;
+	private Color fond;
+	private Point orig;
+	private int diametre;
+	private Random r;
+	
 	
 	//Constructeur
 	public Balle(Color f, Point p, int diam){
 		fond = f;
 		orig = p;
 		diametre = diam;
+		r = new Random();
 	}
 	
 	public void setColor(Color c) {
@@ -23,6 +27,10 @@ public class Balle{
 	public Point getOrig() {
 		return orig;
 	}
+	
+	public int getDiam(){
+		return diametre;
+	}
 
 	public void deplacer2(int x, int y) {
 		orig.setAbscisse(x);
@@ -31,13 +39,17 @@ public class Balle{
 	
 	// déplace le point d’origine de la balle en (x,y)
 	public void deplacer(int x, int y){
-		orig.setAbscisse(x-11);
-		orig.setOrdonne(y-10);
+		orig.setAbscisse(x-(diametre/2));
+		orig.setOrdonne(y-(diametre/2));
 	}	
 	
 	// teste si le point (x,y) est dans la balle ou non
 	public boolean appartient(int x, int y){
 		return (distance(new Point(x, y)) <= diametre);
+	}
+	
+	public boolean appartient2(int x, int y){
+		return (distance(new Point(x-(diametre/2), y-(diametre/2))) <= diametre);
 	}
 	
 	// retourne la distance entre le point p et le point d’orgine de la balle
@@ -47,8 +59,14 @@ public class Balle{
 	
 	//Permet d'avoir une distance plus réaliste, en prenant l'origine non pas en haut à gauche mais au milieu de la balle principale
 	public double distance2(Point p){
-		return Math.sqrt( (p.abscisse() - orig.abscisse()-10)*(p.abscisse() - orig.abscisse()-10) + (p.ordonne() - orig.ordonne()-10)*(p.ordonne() - orig.ordonne()-10));
+		return Math.sqrt( (p.abscisse() - orig.abscisse()-(diametre/2))*(p.abscisse() - orig.abscisse()-(diametre/2)) + (p.ordonne() - orig.ordonne()-(diametre/2))*(p.ordonne() - orig.ordonne()-(diametre/2)));
 	}
+	
+	//Permet de grossir la balle
+	public void grossir(){
+		diametre += r.nextInt(2);
+	}
+
 	
 	// dessine la balle dans le Graphics g
 	public void dessiner(Graphics g){
@@ -59,3 +77,4 @@ public class Balle{
 
 
 }
+

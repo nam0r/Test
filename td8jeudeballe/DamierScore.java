@@ -22,20 +22,24 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 	private boolean stop; private boolean exit=false;
 	private Image offscreen; //Utile pour le double buffering
 	private Graphics og;
-	private Thread thread; //Utile pour faire avancer les cases indépendament
+	private Thread thread; //Utile pour faire avancer les cases indépendamment
 	private Random r;
 	private Case arrivee;
 	private Balle ball; //Balle principale à déplacer
 	private Balle pierre; //Pierres à collecter
-	private Balle amulette; //Amulettes de pouvoir
+	private Balle amulette; //Amulette de pouvoir
+	private Balle amuletteAbsorb; //Amulette d'absorbsion
 	private static int DIAMPIERRE = 10; //Diamètre d'une pierre précieuse
 	private static int DIAMAMULET = 17; //Diamètre d'une amulette
 	private int vitesse; //vitesse des objets
 	private int type; //Le type de difficulté
 	private int score; //Indique le score courant (nombre de rubis)
 	private boolean isAmulette; //Indique si une amulette est sur le terrain
+	private boolean isAmuletteAbsorb; //Indique si une amulette d'absorbsion est sur le terrain
 	private int isAmulettePoss; //Indique si une amulette est en possession de la personne et son type
+	private boolean isAmulettePossAbsorb; //Indique si une amulette d'absorbsion est en possession de la personne
 	private int dureeAmulette; //Indique la durée qu'il reste d'activité à un pouvoir spécial
+	private int dureeAmuletteAbsorb; //Indique la durée qu'il reste d'activité à un pouvoir d'absorbsion
 	private boolean isInvincible;
 
 /********************************** Constructeurs **************************************/
@@ -45,10 +49,10 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		largeurDamier = larg;
 		longueurDamier = lng;
 		nbCase = larg;
-		isAmulette = false;
-		isAmulettePoss = 0;
+		isAmulette = false; isAmuletteAbsorb = false;
+		isAmulettePoss = 0; isAmulettePossAbsorb = false;
 		score = 0;
-		isInvincible = false; //On est de base pas invincible
+		isInvincible = false; // l'humain est vulnérable de naissance
 		setSize(COTECASE*largeurDamier,COTECASE*longueurDamier);
 		r = new Random();
 		
@@ -66,6 +70,8 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		ball = new Balle(Color.green, new Point(0, 0), COTECASE-1);
 		//Amulette de pouvoir
 		genererAmulette();
+		//Amulette d'absorbsion
+		genererAmuletteAbsorb();
 		//Pierre précieuse
 		genererPierre();
 		//Les listeners
@@ -79,23 +85,28 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 /********************************** Run (thread) **************************************/
 
 	//Se lance automatiquement dès que le thread est démarré
+	// Le thread sert pour tous les niveaux de difficulté où les cases bougent : facile et supérieur
 	public void run(){
 		while(true){
-			if (!stop){
-				//Pierre capturée
+			if (!stop){ // Si la partie est encore en marche
+				// Lorsqu'on touche une pierre
 				if(ball.distance2(new Point(pierre.getOrig().abscisse(), pierre.getOrig().ordonne()))< COTECASE-8){
 					score++;
 					genererPierre(); //On génère déjà la pierre suivante
 					initCase();
-					//On génère une amulette si il n'y en a pas
+					//On génère une amulette si le joueur n'en a pas / il n'y en a pas en jeu
 					if(!isAmulette && isAmulettePoss == 0){
 						genererAmulette();
 					}
+					//On génère une amulette d'absorbsion si il n'y en a pas
+					if(!isAmuletteAbsorb && !isAmulettePossAbsorb){
+						genererAmuletteAbsorb();
+					}
 					repaint();
 				}
-				//Amulette juste capturée
+				// Lorsqu'on attrape une amulette
 				if(isAmulette && ball.distance2(new Point(amulette.getOrig().abscisse(), amulette.getOrig().ordonne()))< COTECASE-4){			
-					//Processus pour avoir l'effet du pouvoir de m'amulette
+					//Processus pour avoir l'effet du pouvoir de l'amulette
 					int rand = r.nextInt(3)+1;
 					if(rand == 1) { //Amulette de ralentissement du temps
 						isAmulettePoss = 1; dureeAmulette = 2100/vitesse;
@@ -113,10 +124,10 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 					isAmulettePoss = rand; isAmulette = false;
 					repaint();
 				}
-				//action en cours d'une amulette
+				// Lorsqu'une amulette est en cours d'utilisation
 				if(isAmulettePoss != 0){
 					dureeAmulette--;
-					//Si l'action est terminée on en annule l'effet et on n'a plus d'amulette
+					//Si l'amulette a fini son temps d'action, on en annule l'effet et l'amulette disparait
 					if(dureeAmulette <= 0){
 						if(isAmulettePoss == 1){
 							vitesse /= 3;
@@ -131,33 +142,59 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 						isAmulettePoss = 0;
 					}
 				}
-				//On teste la collision avec un obstacle jaune
-				if(!isInvincible){
+				//Amulette d'absorbsion juste capturée
+				if(isAmuletteAbsorb && ball.appartient2(amuletteAbsorb.getOrig().abscisse(), amuletteAbsorb.getOrig().ordonne())){
+					dureeAmuletteAbsorb = 6250/vitesse;
+					ball.setColor(Color.orange);
+					isAmulettePossAbsorb = true; isAmuletteAbsorb = false;
+					repaint();
+				}
+				//action en cours d'une amulette d'absorbsion
+				if(isAmulettePossAbsorb){
+					dureeAmuletteAbsorb--;
+					if(dureeAmuletteAbsorb <= 0){
+						ball.setColor(Color.green);
+						isAmulettePossAbsorb = false;
+						repaint();
+					}
+				}
+				//On teste la collision avec un obstacle jaune...
+				if(!isInvincible){//... uniquement si on est vulnérable
 					for(int i=0; i<lesObstacles.size(); i++){
-						//Jeu terminé
-						if(ball.distance(new Point(lesObstacles.get(i).origine().abscisse(), lesObstacles.get(i).origine().ordonne())) < lesObstacles.get(i).getTailleCase() ){
-							String typeDifficulte="";
-							switch(type){
-								case 1: typeDifficulte = "Facile"; break;
-								case 2: typeDifficulte = "Normale"; break;
-								case 3: typeDifficulte = "Difficile"; break;
-								case 4: typeDifficulte = "Légendaire"; break;
-								case 5: typeDifficulte = "Contre la montre"; break;
+						// Fin du jeu
+						if((ball.appartient2(lesObstacles.get(i).origine().abscisse(), lesObstacles.get(i).origine().ordonne()) /*< ball.getDiam()+lesObstacles.get(i).getTailleSupCase()*/ )){
+							//si il ne s'agit de la vérification classique
+							if(!isAmulettePossAbsorb){
+								String typeDifficulte="";
+								switch(type){
+									case 1: typeDifficulte = "Facile"; break;
+									case 2: typeDifficulte = "Normale"; break;
+									case 3: typeDifficulte = "Difficile"; break;
+									case 4: typeDifficulte = "Légendaire"; break;
+									case 5: typeDifficulte = "Contre la montre"; break;
+								}
+								JOptionPane.showMessageDialog(this, "La partie est terminée, vous avez fait un score de " + score + " en mode " + typeDifficulte);
+								if((type == 3 || type == 4) && score >= 15){
+									JOptionPane.showMessageDialog(this, "Le mot de passe pour le niveau caché est : toast");
+								}
+								score=0;
+								stop = true;
+								ball.setColor(Color.red);
+								break;
 							}
-							JOptionPane.showMessageDialog(this, "La partie est terminée, vous avez fait un score de " + score + " en mode " + typeDifficulte);
-							if((type == 3 || type == 4) && score >= 15){
-								JOptionPane.showMessageDialog(this, "Le mot de passe pour le niveau caché est : toast");
+							//Si il s'agit du mode d'absorbsion
+							else{
+								//la case disparait
+								lesObstacles.get(i).disparition();
+								//la balle grossit un peu
+								ball.grossir();
 							}
-							score=0;
-							stop = true;
-							ball.setColor(Color.red);
 							repaint();
-							break;
 						}
 					}
 				}
 			}
-			//On affiche les obstacles jaunes
+			// Maintenit le mouvement des obstacles
 			for(int j=0; j<lesObstacles.size(); j++){
 				if(type==1 || type==2) lesObstacles.get(j).bougerXY();
 				else if(type==3) lesObstacles.get(j).bougerXYZ();
@@ -188,17 +225,17 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		}
 		
 		//Permet de faire revenir la balle dans le terrain si la souris en sort mais reste dragged
-		if(e.getX() < 5){
-			ball.deplacer(5, ball.getOrig().ordonne()+10);
+		if(e.getX() < 7){
+			ball.deplacer(5, ball.getOrig().ordonne()+ball.getDiam()/2);
 		}
-		if(e.getX() > COTECASE*largeurDamier-13){
-			ball.deplacer(COTECASE*largeurDamier-13, ball.getOrig().ordonne()+10);
+		if(e.getX() > COTECASE*largeurDamier-9){
+			ball.deplacer(COTECASE*largeurDamier-9, ball.getOrig().ordonne()+ball.getDiam()/2);
 		}
-		if(e.getY() < 5){
-			ball.deplacer(ball.getOrig().abscisse()+11, 5);
+		if(e.getY() < 7){
+			ball.deplacer(ball.getOrig().abscisse()+ball.getDiam()/2, 5);
 		}
-		if(e.getY() > COTECASE*longueurDamier-14){
-			ball.deplacer(ball.getOrig().abscisse()+11, COTECASE*longueurDamier-14);
+		if(e.getY() > COTECASE*longueurDamier-9){
+			ball.deplacer(ball.getOrig().abscisse()+ball.getDiam()/2, COTECASE*longueurDamier-9);
 		}
 		
 		repaint();
@@ -225,7 +262,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		
 	}
 	
-	//Permet de générer une pierre précieuses
+	//Permet de générer une pierre précieuse
 	public void genererPierre(){
 		pierre = new Balle(Color.red, new Point(r.nextInt(largeurDamier*COTECASE - 10)+5, r.nextInt(largeurDamier*COTECASE - 10)+5), DIAMPIERRE);
 	}
@@ -237,7 +274,15 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 			isAmulette = true;
 		}
 	}
-
+	
+	//permet de générer une amulette d'e pouvoir'absorbsion sur le terrain
+	public void genererAmuletteAbsorb(){
+		//if(r.nextInt(8) == 1){//1 chance sur 8 de générer une amulette d'absorbsion
+			amuletteAbsorb = new Balle(Color.orange, new Point(r.nextInt(largeurDamier*COTECASE - 10)+5, r.nextInt(largeurDamier*COTECASE - 10)+5), DIAMAMULET);
+			isAmuletteAbsorb = true;
+		//}
+	}
+	
 	//Méthodes inutiles mais nécessaires
 	public void mouseEntered(MouseEvent e) {
 	}
@@ -271,36 +316,37 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		og = offscreen.getGraphics();
 		og.setClip(0,0,getSize().width, getSize().height);
 		 
-		//Le fond
+		//On crée le fond
 		og.setColor(Color.black);
 		og.fillRect(0, 0, COTECASE*largeurDamier, COTECASE*longueurDamier);
 		
-		//Lignes verticales
+		// Tracer les lignes verticales
 		for(int i=0; i<largeurDamier; i++){
 			og.setColor(Color.gray);
 			og.drawLine(COTECASE*i, 0, COTECASE*i, COTECASE*longueurDamier);
 		}
-		//Lignes horizontales
+		// Tracer les lignes horizontales
 		for(int j=0; j<longueurDamier; j++){
 			og.setColor(Color.gray);
 			og.drawLine(0, COTECASE*j, COTECASE*longueurDamier, COTECASE*j);
 		}
-		//Les objets
+		//Tracer les objets
 		for(int k=0; k<lesObstacles.size(); k++){
 			lesObstacles.get(k).dessiner(og);
 		}
 		
-		//Balle
+		// Tracer la balle : la faire clignoter en cas d'invincibilité
 		if(isInvincible && r.nextInt(2)==1) ball.dessiner(og);
 		else if(!isInvincible) ball.dessiner(og);
 		
 		pierre.dessiner(og); //pierre précieuse
 		if(isAmulette) amulette.dessiner(og); //amulette de pouvoir
+		if(isAmuletteAbsorb) amuletteAbsorb.dessiner(og); //amulette d'absorbsion
 		
-		//super.paint(og);
 		g.drawImage(offscreen, 0, 0, null);
 		og.dispose();//on vide le Graphics og
 
 		
 	}
 }
+
