@@ -100,7 +100,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 				}
 				for(Case c : lesObstacles){
 					// En cas de défaite
-					if(ball.distance(new Point(c.origine().abscisse(), c.origine().ordonne())) < c.getTailleCase()){
+					if(ball.distance2(new Point(c.origine2().abscisse(), c.origine2().ordonne())) < (ball.getDiam()/2 + c.getTailleCase()/2)){
 						JOptionPane.showMessageDialog(this, "Vous avez perdu la partie !");
 						stop = true;
 						ball.setColor(Color.red);
@@ -137,6 +137,20 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 			//Si la souris est pressée et a cliqué au bon endroit
 			ball.deplacer(e.getX(), e.getY());
 				
+			//Permet de faire revenir la balle dans le terrain si la souris en sort mais reste dragged
+			if(e.getX() < 7){
+				ball.deplacer(5, ball.getOrig().ordonne()+ball.getDiam()/2);
+			}
+			if(e.getX() > COTECASE*largeurDamier-9){
+				ball.deplacer(COTECASE*largeurDamier-9, ball.getOrig().ordonne()+ball.getDiam()/2);
+			}
+			if(e.getY() < 7){
+				ball.deplacer(ball.getOrig().abscisse()+ball.getDiam()/2, 5);
+			}
+			if(e.getY() > COTECASE*longueurDamier-9){
+				ball.deplacer(ball.getOrig().abscisse()+ball.getDiam()/2, COTECASE*longueurDamier-9);
+			}
+			
 				if (type == 0){//Si on gagne en mode Super Facile
 					if(ball.appartient(arrivee.origine().abscisse(), arrivee.origine().ordonne())){
 						JOptionPane.showMessageDialog(this, "Vous avez gagné la partie en mode : Très Facile...");
@@ -146,7 +160,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 					}
 					for(Case c : lesObstacles){
 						// Si on perd en mode Super Facile
-						if(ball.distance(new Point(c.origine().abscisse(), c.origine().ordonne())) < c.getTailleCase()){
+						if(ball.distance2(new Point(c.origine2().abscisse(), c.origine2().ordonne())) < (ball.getDiam()/2 + c.getTailleCase()/2)){
 							JOptionPane.showMessageDialog(this, "Vous avez perdu la partie alors que vous étiez en mode Super Facile, êtes-vous sûr que votre souris marche bien ?");
 							stop = true;
 							ball.setColor(Color.red);
@@ -155,19 +169,6 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 						}
 					}
 				}
-		}
-		//Permet de faire revenir la balle dans le terrain si la souris en sort mais reste dragged
-		if(e.getX() < 7){
-			ball.deplacer(5, ball.getOrig().ordonne()+ball.getDiam()/2);
-		}
-		if(e.getX() > COTECASE*largeurDamier-9){
-			ball.deplacer(COTECASE*largeurDamier-9, ball.getOrig().ordonne()+ball.getDiam()/2);
-		}
-		if(e.getY() < 7){
-			ball.deplacer(ball.getOrig().abscisse()+ball.getDiam()/2, 5);
-		}
-		if(e.getY() > COTECASE*longueurDamier-9){
-			ball.deplacer(ball.getOrig().abscisse()+ball.getDiam()/2, COTECASE*longueurDamier-9);
 		}
 		repaint();
 		

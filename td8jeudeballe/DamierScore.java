@@ -42,7 +42,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 	private int dureeAmuletteAbsorb; //Indique la durée qu'il reste d'activité à un pouvoir d'absorbsion
 	private boolean isInvincible;
 
-/********************************** Constructeurs **************************************/
+/********************************** Constructeurs ***************************************/
 	
 	public DamierScore(int larg, int lng, int typ){
 		type = typ;
@@ -82,7 +82,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		thread.start();
 	}
 
-/********************************** Run (thread) **************************************/
+/********************************** Run (thread) ****************************************/
 
 	//Se lance automatiquement dès que le thread est démarré
 	// Le thread sert pour tous les niveaux de difficulté où les cases bougent : facile et supérieur
@@ -90,7 +90,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		while(true){
 			if (!stop){ // Si la partie est encore en marche
 				// Lorsqu'on touche une pierre
-				if(ball.distance2(new Point(pierre.getOrig().abscisse(), pierre.getOrig().ordonne()))< COTECASE-8){
+				if(ball.distance2(new Point(pierre.getOrig2().abscisse(), pierre.getOrig2().ordonne()))< (pierre.getDiam()/2+ball.getDiam()/2) ){
 					score++;
 					genererPierre(); //On génère déjà la pierre suivante
 					initCase();
@@ -105,7 +105,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 					repaint();
 				}
 				// Lorsqu'on attrape une amulette
-				if(isAmulette && ball.distance2(new Point(amulette.getOrig().abscisse(), amulette.getOrig().ordonne()))< COTECASE-4){			
+				if(isAmulette && ball.distance2(new Point(amulette.getOrig2().abscisse(), amulette.getOrig2().ordonne()))< (amulette.getDiam()/2+ball.getDiam()/2)){			
 					//Processus pour avoir l'effet du pouvoir de l'amulette
 					int rand = r.nextInt(3)+1;
 					if(rand == 1) { //Amulette de ralentissement du temps
@@ -143,8 +143,8 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 					}
 				}
 				//Amulette d'absorbsion juste capturée
-				if(isAmuletteAbsorb && ball.appartient2(amuletteAbsorb.getOrig().abscisse(), amuletteAbsorb.getOrig().ordonne())){
-					dureeAmuletteAbsorb = 6250/vitesse;
+				if(isAmuletteAbsorb && ball.distance2(new Point(amuletteAbsorb.getOrig2().abscisse(), amuletteAbsorb.getOrig2().ordonne()))< (amuletteAbsorb.getDiam()/2+ball.getDiam()/2)){
+					dureeAmuletteAbsorb = 5000/vitesse;
 					ball.setColor(Color.orange);
 					isAmulettePossAbsorb = true; isAmuletteAbsorb = false;
 					repaint();
@@ -162,8 +162,8 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 				if(!isInvincible){//... uniquement si on est vulnérable
 					for(int i=0; i<lesObstacles.size(); i++){
 						// Fin du jeu
-						if((ball.appartient2(lesObstacles.get(i).origine().abscisse(), lesObstacles.get(i).origine().ordonne()) /*< ball.getDiam()+lesObstacles.get(i).getTailleSupCase()*/ )){
-							//si il ne s'agit de la vérification classique
+						if(ball.distance2(new Point(lesObstacles.get(i).origine2().abscisse(), lesObstacles.get(i).origine2().ordonne())) < (ball.getDiam()/2 + lesObstacles.get(i).getTailleCase()/2) ){
+							//si il s'agit de la vérification classique
 							if(!isAmulettePossAbsorb){
 								String typeDifficulte="";
 								switch(type){
@@ -206,7 +206,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 		}
 	}
 	
-/********************************** Ecouteurs ******************************************/
+/********************************** Ecouteurs ********************************************/
 
 	public void mousePressed(MouseEvent e){
 		if(ball.appartient(e.getX(), e.getY())){
@@ -257,7 +257,11 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 	//Permet de générer une case jaune
 	public void initCase(){
 		nbObstacles++;
-		int var1 = r.nextInt(largeurDamier); int var2 = r.nextInt(longueurDamier);
+		int var1=0; int var2=0;
+		//Permet d'éviter de générer de case à l'endroit où se trouve la balle
+		while( Math.sqrt((var1-ball.getOrig2().abscisse())*(var1-ball.getOrig2().abscisse()))<COTECASE || Math.sqrt((var1-ball.getOrig2().abscisse())*(var1-ball.getOrig2().abscisse()))<COTECASE || var1==0 || var2==0 ){
+			var1 = r.nextInt(largeurDamier); var2 = r.nextInt(longueurDamier);
+		}
 		lesObstacles.add(new Case(Color.yellow, new Point(var1*COTECASE+1, var2*COTECASE+1), COTECASE-1, COTECASE-1, COTECASE, nbObstacles, nbCase));
 		
 	}
@@ -277,10 +281,10 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 	
 	//permet de générer une amulette d'e pouvoir'absorbsion sur le terrain
 	public void genererAmuletteAbsorb(){
-		//if(r.nextInt(8) == 1){//1 chance sur 8 de générer une amulette d'absorbsion
+		if(r.nextInt(10) == 1){//1 chance sur 10 de générer une amulette d'absorbsion
 			amuletteAbsorb = new Balle(Color.orange, new Point(r.nextInt(largeurDamier*COTECASE - 10)+5, r.nextInt(largeurDamier*COTECASE - 10)+5), DIAMAMULET);
 			isAmuletteAbsorb = true;
-		//}
+		}
 	}
 	
 	//Méthodes inutiles mais nécessaires

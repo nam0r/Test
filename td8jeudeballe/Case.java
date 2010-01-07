@@ -38,8 +38,6 @@ public class Case{
 	public Case(Color f, Point p, int larg, int lng, int cote, int obstacles, int cases){
 		fond = f;
 		orig = p;
-		orig.setAbscisse(orig.abscisse()+largeur/2);
-		orig.setOrdonne(orig.ordonne()+largeur/2);
 		largeur = larg;
 		longueur = lng;
 		coteCase = cote;
@@ -76,15 +74,15 @@ public class Case{
 		return orig;
 	}
 	
-	public int getTailleSupCase(){
-		//if(!isRoundRect) return coteCase;
-		if(isRoundRect) return (hauteurPic*2 - coteCase);
-		else return 0;
+	public Point origine2() {
+		if(L) return new Point(orig.abscisse()+coteCase/2, orig.ordonne()+coteCase/2);
+		else return new Point(orig.abscisse()+getTailleCase()/2, orig.ordonne()+getTailleCase()/2);
 	}
 	
 	public int getTailleCase(){
-		if(!isRoundRect) return coteCase;
-		else return (int)(hauteurPic*1.3);
+		if(L) return (int)(hauteurPic*1.5); //Cas de cases avec pics
+		else if(T) return largeur; //Cas de case grosse frénétique de l'apocalypse
+		else return coteCase;  //Cas classique de case normale
 	}
 
 /*********************************** Modificateurs *********************************************/	
@@ -94,7 +92,7 @@ public class Case{
 		orig.setOrdonne(y);
 	}
 	
-/************************************ Divers ***********************************************/
+/************************************ Divers **************************************************/
 
 	public void disparition(){
 		enVoieDeDisparition = true;
@@ -104,7 +102,7 @@ public class Case{
 		}
 	}
 	
-/*********************** Bouger : mouvements horizontaux/verticaux à partir de facile ***********************/	
+/*********************** Bouger : mouvements horizontaux/verticaux à partir de facile **********/	
 	
 	//Sert pour le mouvement de difficulté facile et normale
 	public void bougerXY(){
@@ -230,7 +228,7 @@ public class Case{
 		}
 	}
 	
-/************************* Bouger : changement de forme des cases pour Légendaire ***************************/	
+/********************** Bouger : changement de forme des cases pour Légendaire *************************/	
 	
 	public void pics(){
 		isRoundRect=true; //permet d'activer la fonction spéciale dans la fonction dessiner
@@ -323,10 +321,19 @@ public class Case{
 	
 /****************************** Bouger : en difficulté Apocalypse ***********************************/	
 	
+	//Permet de replacer et redimensionnet une case à mouvement frénétique
+	public void reInitCase(){
+		longueur = coteCase; largeur = coteCase;
+		int var1 = r.nextInt(nbCase*coteCase); int var2 = r.nextInt(nbCase*coteCase);
+		orig.setAbscisse(var1);
+		orig.setOrdonne(var2);
+		
+	}
+	
 	//Utile pour bouger une case dans une direction oblique rapidement + changement de la taille des cases
 	public void bougerBizarre(int direction){
 		int var=0;
-		if(r.nextInt(20)==0) var=2; //Une fois sur 20 on augmente la taille de la case
+		if(r.nextInt(10)==0) var=2; //Une fois sur 10 on augmente la taille de la case
 //		else if (r.nextInt( (int)(1000*Math.exp(0.0-largeur/coteCase)) )==0) largeur=(int)(largeur*0.2); longueur=(int)(longueur*0.2); // Plus la case est grosse, plus elle a de chances de rapetissir
 		switch(direction){
 			case 0: orig.setAbscisse(orig.abscisse()+r.nextInt(4));
@@ -353,6 +360,8 @@ public class Case{
 		//UNITE = 2; //histoire de multiplier par 2 les déplacements
 		// 1/4 des cases bougeront de la nouvelle manière
 		if (T){
+			if(largeur > 100) reInitCase();//Si la case est trop grande on la réinitialise
+			
 			if(orig.abscisse()<0) orig.setAbscisse(0);
 			if(orig.ordonne()<0) orig.setOrdonne(0);
 			if(orig.abscisse()>coteCase*(nbCase-1)) orig.setAbscisse(coteCase*(nbCase-1));
@@ -368,7 +377,7 @@ public class Case{
 		}
 	}
 
-/************************************ dessiner **********************************************/	
+/************************************** dessiner ************************************************/	
 	
 	//Permet de dessiner la case
 	public void dessiner(Graphics g){

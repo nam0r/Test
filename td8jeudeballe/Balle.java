@@ -28,6 +28,10 @@ public class Balle{
 		return orig;
 	}
 	
+	public Point getOrig2() {
+		return new Point(orig.abscisse()+diametre/2, orig.ordonne()+diametre/2);
+	}
+	
 	public int getDiam(){
 		return diametre;
 	}
@@ -49,7 +53,7 @@ public class Balle{
 	}
 	
 	public boolean appartient2(int x, int y){
-		return (distance(new Point(x-(diametre/2), y-(diametre/2))) <= diametre);
+		return (distance(new Point(x/*-(diametre/2)*/, y/*-(diametre/2)*/)) <= diametre);
 	}
 	
 	// retourne la distance entre le point p et le point d’orgine de la balle
