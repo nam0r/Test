@@ -1,3 +1,8 @@
+/** Authors : ***********************************************/
+/***** Roman MKRTCHIAN mkrtchia@polytech.unice.fr ***********/
+/***** Guy CHAMPOLLION champoll@polytech.unice.fr ***********/
+/** website : http://polytechnice.com ***********************/
+
 import java.awt.Canvas;
 import java.awt.Image;
 import java.awt.Color;
@@ -28,6 +33,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 	private Balle ball;
 	private int vitesse; //vitesse des objets
 	private int type; //Le type de difficulté
+	private boolean perdu;
 
 /********************************** Constructeurs *************************************/
 	
@@ -37,6 +43,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 		longueurDamier=lng;
 		nbCase = larg;
 		setSize(COTECASE*largeurDamier,COTECASE*longueurDamier);
+		perdu = false;
 		r = new Random();
 		
 		//Changements en fonction du type
@@ -90,18 +97,25 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 						case 4: typeDifficulte = "Légendaire !"; break;
 						case 5: typeDifficulte = "Apocalypse !"; break;
 					}
-					JOptionPane.showMessageDialog(this, "Vous avez gagné la partie en mode : " + typeDifficulte);
-					if(type == 3 || type == 4){
-						JOptionPane.showMessageDialog(this, "Le mot de passe pour le niveau caché est : toast");
+					if(perdu){
+						JOptionPane.showMessageDialog(this, "A quoi ca sert de vous acharner ? vous avez déjà perdu cette partie... recommencez donc ;)");
+						stop = true;
 					}
-					stop = true; 
-					ball.setColor(Color.blue);
-					repaint();
+					else{
+						JOptionPane.showMessageDialog(this, "Vous avez gagné la partie en mode : " + typeDifficulte);
+						if(type == 3 || type == 4){
+							JOptionPane.showMessageDialog(this, "Le mot de passe pour le niveau caché est : toast");
+						}
+						stop = true; 
+						ball.setColor(Color.blue);
+						repaint();
+					}
 				}
 				for(Case c : lesObstacles){
 					// En cas de défaite
 					if(ball.distance2(new Point(c.origine2().abscisse(), c.origine2().ordonne())) < (ball.getDiam()/2 + c.getTailleCase()/2)){
 						JOptionPane.showMessageDialog(this, "Vous avez perdu la partie !");
+						perdu = true;
 						stop = true;
 						ball.setColor(Color.red);
 						repaint();
@@ -121,7 +135,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 		}
 	}
 	
-/********************************** Ecouteurs ******************************************/
+/********************************** Ecouteurs *******************************************/
 
 	public void mousePressed(MouseEvent e){
 		if(ball.appartient(e.getX(), e.getY())){
@@ -196,6 +210,7 @@ public class Damier extends Canvas implements MouseListener, MouseMotionListener
 	
 	//Méthode permettant de remettre à 0 si le jeu est terminé
 	public void restart(){
+		perdu=false;
 		ball.deplacer2(0, 0);
 		ball.setColor(Color.green);
 		repaint();

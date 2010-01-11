@@ -1,3 +1,8 @@
+/** Authors : ***********************************************/
+/***** Roman MKRTCHIAN mkrtchia@polytech.unice.fr ***********/
+/***** Guy CHAMPOLLION champoll@polytech.unice.fr ***********/
+/** website : http://polytechnice.com ***********************/
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.lang.Math;

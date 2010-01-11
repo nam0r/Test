@@ -1,3 +1,8 @@
+/** Authors : ***********************************************/
+/***** Roman MKRTCHIAN mkrtchia@polytech.unice.fr ***********/
+/***** Guy CHAMPOLLION champoll@polytech.unice.fr ***********/
+/** website : http://polytechnice.com ***********************/
+
 import java.awt.Canvas;
 import java.awt.Image;
 import java.awt.Color;
@@ -253,7 +258,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 	}
 	
 /******************************** Méthodes diverses *************************************/
-
+	
 	//Permet de générer une case jaune
 	public void initCase(){
 		nbObstacles++;
@@ -281,7 +286,7 @@ public class DamierScore extends Canvas implements MouseListener, MouseMotionLis
 	
 	//permet de générer une amulette d'e pouvoir'absorbsion sur le terrain
 	public void genererAmuletteAbsorb(){
-		if(r.nextInt(10) == 1){//1 chance sur 10 de générer une amulette d'absorbsion
+		if(r.nextInt(8) == 1){//1 chance sur 10 de générer une amulette d'absorbsion
 			amuletteAbsorb = new Balle(Color.orange, new Point(r.nextInt(largeurDamier*COTECASE - 10)+5, r.nextInt(largeurDamier*COTECASE - 10)+5), DIAMAMULET);
 			isAmuletteAbsorb = true;
 		}

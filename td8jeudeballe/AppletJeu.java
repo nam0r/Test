@@ -1,3 +1,8 @@
+/** Authors : ***********************************************/
+/***** Roman MKRTCHIAN mkrtchia@polytech.unice.fr ***********/
+/***** Guy CHAMPOLLION champoll@polytech.unice.fr ***********/
+/** website : http://polytechnice.com ***********************/
+
 import java.awt.Button;
 import java.awt.Panel;
 import java.awt.FlowLayout;
