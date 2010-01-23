@@ -1,10 +1,9 @@
-Bonjour ! 
-Ceci est un projet qui va me permettre d'apprendre à utiliser Git, un gestionnaire de projets assez fameux et de plus en plus utilisé.
-J'utilise comme cobaye un travail à faire en Java : un mini-jeu d'adresse.
+Bonjour !
 
-Merci d'avoir lu, et je vous souhaite de savoir comment maitriser Git !
+Ceci est un projet java réalisé suite à un TD dont l'énoncé est ci-joint en PDF. Il s'appelle test car il permet essentiellement de tester l'utilisation d'un projet sous Git.
 
 Concernant ce jeu, vous pouvez utiliser les sources pour les modifier ou intégrer à un autre projet, à condition de citer les auteurs et de mettre votre projet sous license libre également.
 
+Le jeu reste en développement, et pourra encore évoluer, n'hésitez pas aussi à signaler tout bug ou toute suggestion.
 
-Le jeu est en démo live à cette adresse : http://www.polytech.unice.fr/~mkrtchia
+Vous trouverez une démo live du jeu sous forme d'applet à cette adresse : http://www.polytech.unice.fr/~mkrtchia
